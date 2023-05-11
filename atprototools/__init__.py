@@ -52,8 +52,8 @@ class Session():
             pass
                         
 
-    def rebloot(self, url):
-        """Rebloot a bloot given the URL."""
+    def blootAction(self, url, collection):
+        """act on a bloot given the URL. e.g. likes, rebloots"""
         # sample url from desktop
         # POST https://bsky.social/xrpc/com.atproto.repo.createRecord
         # https://staging.bsky.app/profile/klatz.co/post/3jruqqeygrt2d
@@ -72,7 +72,7 @@ class Session():
         }
         '''
 
-        person_youre_reblooting = self.resolveHandle(url.split('/')[-3]).json().get('did') # its a DID
+        author_of_bloot = self.resolveHandle(url.split('/')[-3]).json().get('did') # its a DID
         url_identifier = url.split('/')[-1]
 
         # import pdb; pdb.set_trace()
@@ -85,15 +85,15 @@ class Session():
         headers = {"Authorization": "Bearer " + self.ATP_AUTH_TOKEN}
 
         data = {
-            "collection": "app.bsky.feed.repost",
+            "collection": collection,
             "repo": "{}".format(self.DID),
             "record": {
                 "subject": {
-                    "uri":"at://{}/app.bsky.feed.post/{}".format(person_youre_reblooting, url_identifier),
+                    "uri":"at://{}/app.bsky.feed.post/{}".format(author_of_bloot, url_identifier),
                     "cid":"{}".format(bloot_cid) # cid of the bloot to rebloot
                 },
                 "createdAt": timestamp,
-                "$type": "app.bsky.feed.repost"
+                "$type": collection
             }
         }
 
@@ -104,6 +104,14 @@ class Session():
         )
 
         return resp
+
+    def rebloot(self, url):
+        """Rebloot a bloot."""
+        return self.bloot_action(url, "app.bsky.feed.repost")
+
+    def likeBloot(self, url):
+        """Like a bloot."""
+        return self.bloot_action(url, "app.bsky.feed.like")
 
     def resolveHandle(self, username):
         """Get the DID given a username, aka getDid."""
