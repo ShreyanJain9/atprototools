@@ -300,6 +300,10 @@ class Session():
 
         return resp
     
+    def block(username = None, did = None)
+        return resp
+    
+    
     def unfollow(self):
         # TODO lots of code re-use. package everything into a API_ACTION class.
         raise NotImplementedError
