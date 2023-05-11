@@ -275,13 +275,13 @@ class Session():
     # and then you can dive into that and ask for the request. probably this means writing a class to encapsulate each of the
     # API actions, populating the class in the implementations, and making the top-level api as pretty as possible
     # ideally atproto lib contains meaty close-to-the-api and atprototools is a layer on top that focuses on ergonomics?
-    def follow(self, username=None, did_of_person_you_wanna_follow=None):
+    def profileAction(self, collection, username=None, did_of_person=None):
         """Follow the user with the given username or DID."""
 
         if username:
-            did_of_person_you_wanna_follow = self.resolveHandle(username).json().get("did")
+            did_of_person = self.resolveHandle(username).json().get("did")
 
-        if not did_of_person_you_wanna_follow:
+        if not did_of_person:
             # TODO better error in resolveHandle
             raise ValueError("Failed; please pass a username or did of the person you want to follow (maybe the account doesn't exist?)")
 
@@ -291,12 +291,12 @@ class Session():
         headers = {"Authorization": "Bearer " + self.ATP_AUTH_TOKEN}
 
         data = {
-            "collection": "app.bsky.graph.follow",
+            "collection": collection,
             "repo": "{}".format(self.DID),
             "record": {
-                "subject": did_of_person_you_wanna_follow,
+                "subject": did_of_person,
                 "createdAt": timestamp,
-                "$type": "app.bsky.graph.follow"
+                "$type": collection
             }
         }
 
@@ -307,9 +307,12 @@ class Session():
         )
 
         return resp
+
+    def follow(self, username):
+        return self.profileAction("app.bsky.actor.follow", username)
     
-    def block(username = None, did = None)
-        return resp
+    def block(self, username):
+        return self.profileAction("app.bsky.actor.block", username)
     
     
     def unfollow(self):
